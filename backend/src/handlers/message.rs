@@ -3,6 +3,7 @@ use crate::middleware::CurrentUser;
 use crate::models::{CreateMessageRequest, MessageResponse};
 use crate::services::{ChannelService, MessageService, ServerService};
 use crate::utils::AppResult;
+use crate::ws::{WsMessage, broadcast_to_channel};
 use axum::{
   Extension, Json,
   extract::{Path, Query, State},
@@ -29,6 +30,22 @@ pub async fn create_message(
   Json(req): Json<CreateMessageRequest>,
 ) -> AppResult<Json<MessageResponse>> {
   let message = MessageService::create_message(&state.db, channel_id, user.id, req).await?;
+
+  let ws_message = WsMessage::MessageCreated {
+    id: message.id,
+    channel_id: message.channel_id,
+    user_id: message.user_id,
+    username: message.username.clone(),
+    content: message.content.clone(),
+    created_at: message.created_at.to_rfc3339(),
+  };
+
+  if let Err(e) =
+    broadcast_to_channel(&state.connections, channel_id, ws_message, Some(user.id)).await
+  {
+    tracing::error!("Failed to broadcast message: {}", e);
+  }
+
   Ok(Json(message))
 }
 

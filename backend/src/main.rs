@@ -18,10 +18,12 @@ mod middleware;
 mod models;
 mod services;
 mod utils;
+mod ws;
 
 #[derive(Clone)]
 pub struct AppState {
   pub db: sqlx::PgPool,
+  pub connections: ws::ConnectionMap,
 }
 
 #[tokio::main]
@@ -50,7 +52,9 @@ async fn main() -> anyhow::Result<()> {
 
   tracing::info!("Database migrations completed.");
 
-  let state = AppState { db };
+  let connections = ws::ConnectionMap::default();
+
+  let state = AppState { db, connections };
 
   let cors = CorsLayer::new()
     .allow_origin(Any)
@@ -60,6 +64,8 @@ async fn main() -> anyhow::Result<()> {
   let app = Router::new()
     .route("/", get(root_handler))
     .route("/health", get(health_check))
+    // WebSocket route
+    .route("/ws", get(ws::ws_handler))
     // Auth routes (public)
     .route("/api/auth/register", post(handlers::auth::register))
     .route("/api/auth/login", post(handlers::auth::login))
