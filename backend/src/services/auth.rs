@@ -79,19 +79,23 @@ impl AuthService {
   }
 
   pub async fn create_user(db: &PgPool, req: CreateUserRequest) -> AppResult<User> {
-    if req.username.is_empty() || req.email.is_empty() || req.password.is_empty() {
+    let username = req.username.trim().to_lowercase();
+    let email = req.email.trim();
+    let password = req.password.trim();
+
+    if username.is_empty() || email.is_empty() || password.is_empty() {
       return Err(AppError::ValidationError(
         "All fields are required".to_string(),
       ));
     }
 
-    if req.password.len() < 8 {
+    if password.len() < 8 {
       return Err(AppError::ValidationError(
         "Password must be at least 8 characters".to_string(),
       ));
     }
 
-    let password_hash = Self::hash_password(&req.password)?;
+    let password_hash = Self::hash_password(&password)?;
 
     let user = sqlx::query_as::<_, User>(
       r#"
@@ -100,8 +104,8 @@ impl AuthService {
       RETURNING id, username, email, password_hash, created_at, updated_at
       "#,
     )
-    .bind(&req.username)
-    .bind(&req.email)
+    .bind(&username)
+    .bind(&email)
     .bind(&password_hash)
     .fetch_one(db)
     .await
@@ -116,21 +120,44 @@ impl AuthService {
   }
 
   pub async fn authenticate_user(db: &PgPool, req: LoginRequest) -> AppResult<User> {
-    let user = sqlx::query_as::<_, User>(
-      r#"
-      SELECT id, username, email, password_hash, created_at, updated_at
-      FROM users
-      WHERE email = $1
-      "#,
-    )
-    .bind(&req.email)
-    .fetch_optional(db)
-    .await?
-    .ok_or_else(|| AppError::Unauthorized("Invalid email or password".to_string()))?;
+    let mut user: Option<User> = None;
+
+    if let Some(email) = req.email {
+      user = Some(
+        sqlx::query_as::<_, User>(
+          r#"
+        SELECT id, username, email, password_hash, created_at, updated_at
+        FROM users
+        WHERE email = $1
+        "#,
+        )
+        .bind(&email)
+        .fetch_optional(db)
+        .await?
+        .ok_or_else(|| AppError::Unauthorized("Invalid login information".to_string()))?,
+      );
+    } else if let Some(username) = req.username {
+      user = Some(
+        sqlx::query_as::<_, User>(
+          r#"
+        SELECT id, username, email, password_hash, created_at, updated_at
+        FROM users
+        WHERE username = $1
+        "#,
+        )
+        .bind(&username)
+        .fetch_optional(db)
+        .await?
+        .ok_or_else(|| AppError::Unauthorized("Invalid login information".to_string()))?,
+      );
+    }
+
+    let user =
+      user.ok_or_else(|| AppError::Unauthorized("Invalid login information".to_string()))?;
 
     if !Self::verify_password(&req.password, &user.password_hash)? {
       return Err(AppError::Unauthorized(
-        "Invalid email or password".to_string(),
+        "Invalid login information".to_string(),
       ));
     }
 

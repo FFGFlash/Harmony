@@ -33,7 +33,11 @@ pub async fn login(
   State(state): State<AppState>,
   Json(req): Json<LoginRequest>,
 ) -> AppResult<Json<AuthResponse>> {
-  tracing::info!("User login attempt: {}", req.email);
+  if let Some(email) = &req.email {
+    tracing::info!("User login attempt: {}", email);
+  } else if let Some(username) = &req.username {
+    tracing::info!("User login attempt: {}", username);
+  }
 
   let user = AuthService::authenticate_user(&state.db, req).await?;
   let token = AuthService::generate_token(user.id)?;
