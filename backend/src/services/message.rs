@@ -1,6 +1,5 @@
 use crate::models::{CreateMessageRequest, Message, MessageResponse};
 use crate::services::channel::ChannelService;
-use crate::services::server::ServerService;
 use crate::utils::{AppError, AppResult};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -14,11 +13,9 @@ impl MessageService {
     user_id: Uuid,
     req: CreateMessageRequest,
   ) -> AppResult<MessageResponse> {
-    let channel = ChannelService::get_channel_by_id(db, channel_id).await?;
-
-    if !ServerService::is_member(db, channel.server_id, user_id).await? {
+    if !ChannelService::user_has_access_to_channel(db, channel_id, user_id).await? {
       return Err(AppError::Unauthorized(
-        "You must be a member of the server to send messages".to_string(),
+        "You don't have access to that channel".to_string(),
       ));
     }
 

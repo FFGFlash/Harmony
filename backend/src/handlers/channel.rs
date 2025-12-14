@@ -16,13 +16,7 @@ pub async fn create_channel(
   Json(req): Json<CreateChannelRequest>,
 ) -> AppResult<Json<ChannelResponse>> {
   let channel = ChannelService::create_channel(&state.db, server_id, user.id, req).await?;
-  Ok(Json(ChannelResponse {
-    id: channel.id,
-    server_id: channel.server_id,
-    name: channel.name,
-    position: channel.position,
-    created_at: channel.created_at,
-  }))
+  Ok(Json(channel.to_response()))
 }
 
 pub async fn get_server_channels(
@@ -38,16 +32,7 @@ pub async fn get_server_channels(
   }
 
   let channels = ChannelService::get_server_channels(&state.db, server_id).await?;
-  let responses = channels
-    .into_iter()
-    .map(|c| ChannelResponse {
-      id: c.id,
-      server_id: c.server_id,
-      name: c.name,
-      position: c.position,
-      created_at: c.created_at,
-    })
-    .collect();
+  let responses = channels.into_iter().map(|c| c.to_response()).collect();
   Ok(Json(responses))
 }
 

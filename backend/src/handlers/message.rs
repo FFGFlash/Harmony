@@ -1,7 +1,7 @@
 use crate::AppState;
 use crate::middleware::CurrentUser;
 use crate::models::{CreateMessageRequest, MessageResponse};
-use crate::services::{ChannelService, MessageService, ServerService};
+use crate::services::{ChannelService, MessageService};
 use crate::utils::AppResult;
 use crate::ws::{WsMessage, broadcast_to_channel};
 use axum::{
@@ -18,7 +18,6 @@ pub struct GetMessagesQuery {
   before: Option<Uuid>,
 }
 
-#[allow(dead_code)] // Not actually dead, just supressing warning
 fn default_limit() -> i64 {
   50
 }
@@ -55,12 +54,10 @@ pub async fn get_messages(
   Path(channel_id): Path<Uuid>,
   Query(query): Query<GetMessagesQuery>,
 ) -> AppResult<Json<Vec<MessageResponse>>> {
-  // Verify user has access to this channel
-  let channel = ChannelService::get_channel_by_id(&state.db, channel_id).await?;
-
-  if !ServerService::is_member(&state.db, channel.server_id, user.id).await? {
+  // Verify user has access to the channel
+  if !ChannelService::user_has_access_to_channel(&state.db, channel_id, user.id).await? {
     return Err(crate::utils::AppError::Unauthorized(
-      "You are not a member of this server".to_string(),
+      "You don't have access to this channel".to_string(),
     ));
   }
 

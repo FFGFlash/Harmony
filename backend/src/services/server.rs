@@ -1,6 +1,6 @@
 use crate::models::{CreateServerRequest, Server};
 use crate::utils::{AppError, AppResult};
-use sqlx::PgPool;
+use sqlx::{Executor, PgPool, Postgres};
 use uuid::Uuid;
 
 pub struct ServerService;
@@ -90,7 +90,10 @@ impl ServerService {
     Ok(server)
   }
 
-  pub async fn is_member(db: &PgPool, server_id: Uuid, user_id: Uuid) -> AppResult<bool> {
+  pub async fn is_member<'e, E>(db: E, server_id: Uuid, user_id: Uuid) -> AppResult<bool>
+  where
+    E: Executor<'e, Database = Postgres>,
+  {
     let result = sqlx::query_scalar::<_, bool>(
       r#"
       SELECT EXISTS(

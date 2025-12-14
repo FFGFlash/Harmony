@@ -16,6 +16,7 @@ use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitEx
 mod handlers;
 mod middleware;
 mod models;
+mod routers;
 mod services;
 mod utils;
 mod ws;
@@ -70,38 +71,7 @@ async fn main() -> anyhow::Result<()> {
     .route("/api/auth/register", post(handlers::auth::register))
     .route("/api/auth/login", post(handlers::auth::login))
     // Protected routes
-    .nest(
-      "/api",
-      Router::new()
-        .route("/servers", post(handlers::server::create_server))
-        .route("/servers", get(handlers::server::get_user_servers))
-        .route("/servers/{server_id}", get(handlers::server::get_server))
-        .route(
-          "/servers/{server_id}",
-          delete(handlers::server::delete_server),
-        )
-        .route(
-          "/servers/{server_id}/channels",
-          post(handlers::channel::create_channel),
-        )
-        .route(
-          "/servers/{server_id}/channels",
-          get(handlers::channel::get_server_channels),
-        )
-        .route(
-          "/channels/{channel_id}",
-          delete(handlers::channel::delete_channel),
-        )
-        .route(
-          "/channels/{channel_id}/messages",
-          post(handlers::message::create_message),
-        )
-        .route(
-          "/channels/{channel_id}/messages",
-          get(handlers::message::get_messages),
-        )
-        .layer(axum::middleware::from_fn(middleware::auth_middleware)),
-    )
+    .nest("/api", routers::api::routes())
     .layer(cors)
     .layer(TraceLayer::new_for_http())
     .with_state(state);
