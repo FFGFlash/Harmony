@@ -2,7 +2,7 @@ use std::{env, net::SocketAddr};
 
 use axum::{
   Router,
-  routing::{delete, get, post},
+  routing::{get, post},
 };
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
