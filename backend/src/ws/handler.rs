@@ -29,10 +29,10 @@ pub async fn ws_handler(
 
   tracing::info!("WebSocket upgrade request from user: {}", user_id);
 
-  Ok(ws.on_upgrade(move |socket| handle_socket(socket, user_id, state.connections)))
+  Ok(ws.on_upgrade(move |socket| handle_socket(socket, user_id, state.connections.clone())))
 }
 
-async fn handle_socket(socket: WebSocket, user_id: Uuid, connections: ConnectionMap) {
-  let connection = Connection::new(user_id, socket, connections);
+async fn handle_socket(socket: WebSocket, user_id: Uuid, connection_map: ConnectionMap) {
+  let connection = Connection::new(user_id, socket, connection_map);
   connection.handle().await;
 }
