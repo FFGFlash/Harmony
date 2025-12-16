@@ -25,7 +25,7 @@ impl MessageService {
       ));
     }
 
-    if req.content.len() > 200 {
+    if req.content.len() > 2000 {
       return Err(AppError::ValidationError(
         "Message cannot exceed 2000 characters".to_string(),
       ));
@@ -80,7 +80,7 @@ impl MessageService {
           m.created_at,
           m.updated_at
         FROM messages m
-        INNER JOIN user u ON m.user_id = u.id
+        INNER JOIN users u ON m.user_id = u.id
         WHERE m.channel_id = $1
           AND m.created_at < (SELECT created_at FROM messages WHERE id = $2)
         ORDER BY m.created_at ASC
