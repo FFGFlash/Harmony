@@ -164,7 +164,7 @@ impl ServerService {
 
       if channel_server_id != Some(server_id) {
         return Err(AppError::BadRequest(
-          "Channel does not belong to this seerver".to_string(),
+          "Channel does not belong to this server".to_string(),
         ));
       }
     }
