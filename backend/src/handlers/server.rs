@@ -1,6 +1,6 @@
 use crate::AppState;
 use crate::middleware::CurrentUser;
-use crate::models::{CreateServerRequest, ServerResponse};
+use crate::models::{CreateServerRequest, ServerResponse, UpdateServerRequest};
 use crate::services::ServerService;
 use crate::utils::AppResult;
 use axum::{
@@ -55,4 +55,14 @@ pub async fn delete_server(
   Ok(Json(
     serde_json::json!({"message": "Server deleted successfully"}),
   ))
+}
+
+pub async fn update_server(
+  State(state): State<AppState>,
+  Extension(user): Extension<CurrentUser>,
+  Path(server_id): Path<Uuid>,
+  Json(req): Json<UpdateServerRequest>,
+) -> AppResult<Json<ServerResponse>> {
+  let server = ServerService::update_server(&state.db, server_id, user.id, req).await?;
+  Ok(Json(server.to_response(user.id)))
 }

@@ -83,7 +83,7 @@ impl MessageService {
         INNER JOIN user u ON m.user_id = u.id
         WHERE m.channel_id = $1
           AND m.created_at < (SELECT created_at FROM messages WHERE id = $2)
-        ORDER BY m.created_at DESC
+        ORDER BY m.created_at ASC
         LIMIT $3
         "#,
       )
@@ -106,7 +106,7 @@ impl MessageService {
         FROM messages m
         INNER JOIN users u ON m.user_id = u.id
         WHERE m.channel_id = $1
-        ORDER BY m.created_at DESC
+        ORDER BY m.created_at ASC
         LIMIT $2
         "#,
       )

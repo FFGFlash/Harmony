@@ -1,11 +1,6 @@
 use crate::services::AuthService;
 use crate::utils::{AppError, AppResult};
-use axum::{
-  extract::{Request, State},
-  http::header,
-  middleware::Next,
-  response::Response,
-};
+use axum::{extract::Request, http::header, middleware::Next, response::Response};
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -39,6 +34,7 @@ pub async fn auth_middleware(mut req: Request, next: Next) -> AppResult<Response
   Ok(next.run(req).await)
 }
 
+#[allow(dead_code)]
 pub trait RequestExt {
   fn current_user(&self) -> Option<&CurrentUser>;
 }

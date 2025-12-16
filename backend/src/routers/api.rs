@@ -16,6 +16,10 @@ pub fn routes() -> Router<AppState> {
       "/servers/{server_id}",
       delete(handlers::server::delete_server),
     )
+    .route(
+      "/servers/{server_id}",
+      patch(handlers::server::update_server),
+    )
     // Server Channels
     .route(
       "/servers/{server_id}/channels",

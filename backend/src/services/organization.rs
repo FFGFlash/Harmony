@@ -257,9 +257,9 @@ impl OrganizationService {
 
     for folder in folders {
       // Get servers in this folder
-      let servers = sqlx::query_as::<_, (Uuid, String, Uuid, i32)>(
+      let servers = sqlx::query_as::<_, (Uuid, String, Uuid, Option<Uuid>, i32)>(
         r#"
-        SELECT s.id, s.name, s.owner_id, so.position
+        SELECT s.id, s.name, s.owner_id, s.main_channel_id, so.position
         FROM servers s
         INNER JOIN server_organization so ON s.id = so.server_id
         WHERE so.user_id = $1 AND so.folder_id = $2
@@ -273,10 +273,11 @@ impl OrganizationService {
 
       let server_responses: Vec<ServerResponse> = servers
         .into_iter()
-        .map(|(id, name, owner_id, _)| ServerResponse {
+        .map(|(id, name, owner_id, main_channel_id, _)| ServerResponse {
           id,
           name,
           owner_id,
+          main_channel_id,
           is_owner: owner_id == user_id,
           created_at: chrono::Utc::now(), // We could fetch this if needed
         })
@@ -293,9 +294,9 @@ impl OrganizationService {
     }
 
     // Get ungrouped servers
-    let ungrouped = sqlx::query_as::<_, (Uuid, String, Uuid)>(
+    let ungrouped = sqlx::query_as::<_, (Uuid, String, Uuid, Option<Uuid>)>(
       r#"
-      SELECT s.id, s.name, s.owner_id
+      SELECT s.id, s.name, s.owner_id, s.main_channel_id
       FROM servers s
       INNER JOIN server_organization so ON s.id = so.server_id
       WHERE so.user_id = $1 AND so.folder_id IS NULL
@@ -308,11 +309,12 @@ impl OrganizationService {
 
     let ungrouped_servers: Vec<ServerResponse> = ungrouped
       .into_iter()
-      .map(|(id, name, owner_id)| ServerResponse {
+      .map(|(id, name, owner_id, main_channel_id)| ServerResponse {
         id,
         name,
         owner_id,
         is_owner: owner_id == user_id,
+        main_channel_id,
         created_at: chrono::Utc::now(),
       })
       .collect();
