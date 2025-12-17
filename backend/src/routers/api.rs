@@ -8,6 +8,21 @@ use crate::{AppState, handlers, middleware};
 // Protected api routes
 pub fn routes() -> Router<AppState> {
   Router::new()
+    // Users
+    .route(
+      "/users/{user_id}/friend",
+      post(handlers::friendship::create_friend_request),
+    )
+    // Friends
+    .route("/friends", get(handlers::friendship::get_friends))
+    .route(
+      "/friends/incoming",
+      get(handlers::friendship::get_incoming_requests),
+    )
+    .route(
+      "/friends/outgoing",
+      get(handlers::friendship::get_outgoing_requests),
+    )
     // Servers
     .route("/servers", post(handlers::server::create_server))
     .route("/servers", get(handlers::server::get_user_servers))

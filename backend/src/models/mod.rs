@@ -1,4 +1,5 @@
 pub mod channel;
+pub mod friendship;
 pub mod message;
 pub mod organization;
 pub mod server;
@@ -9,6 +10,7 @@ pub use channel::{
   CreateGroupDmRequest, DmChannel, DmChannelResponse, DmParticipant, DmParticipantInfo,
   UpdateChannelRequest,
 };
+pub use friendship::{Friendship, FriendshipStatus};
 pub use message::{CreateMessageRequest, Message, MessageResponse};
 pub use organization::{
   BatchUpdateServerPositionsRequest, CreateFolderRequest, FolderResponse, OrganizedServersResponse,
@@ -16,4 +18,4 @@ pub use organization::{
   UpdateServerOrganizationRequest,
 };
 pub use server::{CreateServerRequest, Server, ServerResponse, UpdateServerRequest};
-pub use user::{CreateUserRequest, LoginRequest, User, UserResponse};
+pub use user::{CreateUserRequest, LoginRequest, Profile, User, UserResponse};

@@ -14,6 +14,13 @@ pub struct User {
   pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone, Serialize, FromRow)]
+pub struct Profile {
+  pub id: Uuid,
+  pub username: String,
+  pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct CreateUserRequest {
   pub username: String,
