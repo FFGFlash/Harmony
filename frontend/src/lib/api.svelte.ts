@@ -153,12 +153,24 @@ class Api {
 		return this.fetch(`/api/users/username/${username}`, undefined, ProfileSchema)
 	}
 
-	async sendFriendRequest(username: string) {
+	async sendFriendRequestByUsername(username: string) {
 		return this.fetch(
 			`/api/friends`,
 			{ method: 'POST', body: JSON.stringify({ username }) },
 			FriendshipSchema
 		)
+	}
+
+	async sendFriendRequestById(id: string) {
+		return this.fetch(`/api/users/${id}/friend`, { method: 'POST' }, FriendshipSchema)
+	}
+
+	async rejectFriendRequest(id: string): Promise<void> {
+		return this.fetch(`/api/users/${id}/friend/reject`, { method: 'POST' })
+	}
+
+	async removeFriend(id: string): Promise<void> {
+		return this.fetch(`/api/users/${id}/friend`, { method: 'DELETE' })
 	}
 
 	async getFriends(offset?: number) {
@@ -213,10 +225,7 @@ class Api {
 
 export const api = new Api()
 
-declare global {
-	var api: Api | undefined
-}
-
 if (browser && dev) {
+	//@ts-expect-error debugging
 	globalThis.api = api
 }
