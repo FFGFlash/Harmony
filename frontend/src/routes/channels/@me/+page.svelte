@@ -1,31 +1,8 @@
 <script lang="ts">
-	import { createMutation, useQueryClient } from '@tanstack/svelte-query'
-	import { api } from '$lib/api.svelte'
 	import { Tabs } from '@skeletonlabs/skeleton-svelte'
 	import FriendsList from '$lib/features/friends/FriendsList.svelte'
 	import PendingRequests from '$lib/features/friends/PendingRequests.svelte'
 	import AddFriend from '$lib/features/friends/AddFriend.svelte'
-
-	let username = $state('')
-
-	const queryClient = useQueryClient()
-
-	const sendFriendRequest = createMutation(() => ({
-		mutationKey: ['friends', 'outgoing'],
-		mutationFn({ username }: { username: string }) {
-			return api.sendFriendRequestByUsername(username)
-		},
-		onSuccess() {
-			queryClient.invalidateQueries({ queryKey: ['friends', 'outgoing'] })
-		}
-	}))
-
-	function handleSubmit(e: SubmitEvent) {
-		e.preventDefault()
-		const trimmedUsername = username.trim()
-		if (trimmedUsername.length <= 0) return
-		sendFriendRequest.mutate({ username: trimmedUsername })
-	}
 </script>
 
 <div class="flex">
