@@ -52,15 +52,17 @@
 	</div>
 
 	<div class="flex w-60 flex-col bg-surface-100-900">
-		<div class="flex h-12 items-center border-b border-surface-500 px-4 shadow-sm">
-			<h2 class="truncate h2 text-base">
-				{#if isDM}
-					<UserSearch />
-				{:else}
+		{#if isDM}
+			<div class="flex h-12 items-center border-b border-surface-500 px-2 shadow-sm">
+				<UserSearch />
+			</div>
+		{:else}
+			<div class="flex h-12 items-center border-b border-surface-500 px-4 shadow-sm">
+				<h2 class="truncate h2 text-base">
 					{server.data?.name}
-				{/if}
-			</h2>
-		</div>
+				</h2>
+			</div>
+		{/if}
 
 		<div class="flex-1 overflow-y-auto pt-4">
 			{#if isDM}
