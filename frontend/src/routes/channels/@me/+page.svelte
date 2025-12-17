@@ -79,8 +79,8 @@
 				<Tabs.Indicator />
 			</Tabs.List>
 			<Tabs.Content value="friends">
-				Friends List
-				<div class="flex flex-col">
+				<div class="flex flex-col gap-2">
+					<span>Friends List</span>
 					{#if friends.isPending}
 						Loading...
 					{:else if friends.isError}
