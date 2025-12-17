@@ -6,6 +6,7 @@
 	import { untrack } from 'svelte'
 	import { websocket } from '$lib/stores/websocket.svelte'
 	import ChannelView from '$lib/components/ChannelView.svelte'
+	import MemberList from '$lib/components/MemberList.svelte'
 
 	const { params, data }: PageProps = $props()
 
@@ -37,7 +38,5 @@
 	{:else}
 		<div class="flex h-dvh flex-1 items-center justify-center">Not Found</div>
 	{/if}
-	<div class="h-dvh w-60 border-l border-surface-300-700">
-		<!-- TODO: Members List -->
-	</div>
+	<MemberList {serverId} />
 </div>

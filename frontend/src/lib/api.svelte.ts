@@ -4,7 +4,11 @@ import {
 	AuthResponseSchema,
 	ChannelSchema,
 	ErrorResponseSchema,
+	FriendshipSchema,
+	FullProfileSchema,
 	MessageSchema,
+	PaginatedResponse,
+	ProfileSchema,
 	ServerSchema,
 	type ErrorResponse,
 	type LoginRequest,
@@ -142,6 +146,67 @@ class Api {
 			'/api/dms',
 			{ method: 'POST', body: JSON.stringify({ recipient_id: recipientId }) },
 			ChannelSchema
+		)
+	}
+
+	async getUserByUsername(username: string) {
+		return this.fetch(`/api/users/username/${username}`, undefined, ProfileSchema)
+	}
+
+	async sendFriendRequest(username: string) {
+		return this.fetch(
+			`/api/friends`,
+			{ method: 'POST', body: JSON.stringify({ username }) },
+			FriendshipSchema
+		)
+	}
+
+	async getFriends(offset?: number) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
+		const params = new URLSearchParams()
+		if (offset != null) params.append('offset', offset.toString())
+		return this.fetch(`/api/friends?${params}`, undefined, PaginatedResponse(FullProfileSchema))
+	}
+
+	async getIncomingFriendRequests(offset?: number) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
+		const params = new URLSearchParams()
+		if (offset != null) params.append('offset', offset.toString())
+		return this.fetch(
+			`/api/friends/incoming?${params}`,
+			undefined,
+			PaginatedResponse(FullProfileSchema)
+		)
+	}
+
+	async getOutgoingFriendRequests(offset?: number) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
+		const params = new URLSearchParams()
+		if (offset != null) params.append('offset', offset.toString())
+		return this.fetch(
+			`/api/friends/outgoing?${params}`,
+			undefined,
+			PaginatedResponse(FullProfileSchema)
+		)
+	}
+
+	async getServerMembers(serverId: string, offset?: number) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
+		const params = new URLSearchParams()
+		if (offset != null) params.append('offset', offset.toString())
+		return this.fetch(
+			`/api/servers/${serverId}/members?${params}`,
+			undefined,
+			PaginatedResponse(FullProfileSchema)
+		)
+	}
+
+	async searchUsers(username: string) {
+		const params = new URLSearchParams({ username })
+		return this.fetch(
+			`/api/users/search?${params}`,
+			undefined,
+			PaginatedResponse(FullProfileSchema)
 		)
 	}
 }

@@ -2,6 +2,7 @@ pub mod channel;
 pub mod friendship;
 pub mod message;
 pub mod organization;
+pub mod pagination;
 pub mod server;
 pub mod user;
 
@@ -17,5 +18,8 @@ pub use organization::{
   ServerFolder, ServerOrganization, ServerPositionUpdate, UpdateFolderRequest,
   UpdateServerOrganizationRequest,
 };
+pub use pagination::{PaginatedResponse, PaginationParams};
 pub use server::{CreateServerRequest, Server, ServerResponse, UpdateServerRequest};
-pub use user::{CreateUserRequest, LoginRequest, Profile, User, UserResponse};
+pub use user::{
+  CreateUserRequest, FullProfile, LoginRequest, Profile, UpdateProfileRequest, User, UserResponse,
+};

@@ -8,13 +8,49 @@ use crate::{AppState, handlers, middleware};
 // Protected api routes
 pub fn routes() -> Router<AppState> {
   Router::new()
+    .route("/me/profile", get(handlers::profile::get_my_profile))
+    .route("/me/profile", patch(handlers::profile::update_my_profile))
     // Users
+    .route("/users/search", get(handlers::friendship::search_users))
+    .route(
+      "/users/{user_id}",
+      get(handlers::friendship::get_user_profile),
+    )
+    .route(
+      "/users/{user_id}/profile",
+      get(handlers::profile::get_user_full_profile),
+    )
+    .route(
+      "/users/username/{username}",
+      get(handlers::friendship::get_user_by_username),
+    )
+    .route(
+      "/users/username/{username}/profile",
+      get(handlers::profile::get_user_full_profile_by_username),
+    )
     .route(
       "/users/{user_id}/friend",
       post(handlers::friendship::create_friend_request),
     )
+    .route(
+      "/users/{user_id}/friend",
+      delete(handlers::friendship::remove_friend),
+    )
+    .route(
+      "/users/{user_id}/friend/reject",
+      post(handlers::friendship::reject_friend_request),
+    )
+    .route(
+      "/users/{user_id}/block",
+      post(handlers::friendship::block_user),
+    )
+    .route(
+      "/users/{user_id}/unblock",
+      delete(handlers::friendship::unblock_user),
+    )
     // Friends
     .route("/friends", get(handlers::friendship::get_friends))
+    .route("/friends", post(handlers::friendship::send_friend_request))
     .route(
       "/friends/incoming",
       get(handlers::friendship::get_incoming_requests),
@@ -22,6 +58,10 @@ pub fn routes() -> Router<AppState> {
     .route(
       "/friends/outgoing",
       get(handlers::friendship::get_outgoing_requests),
+    )
+    .route(
+      "/friends/blocked",
+      get(handlers::friendship::get_blocked_users),
     )
     // Servers
     .route("/servers", post(handlers::server::create_server))
@@ -34,6 +74,10 @@ pub fn routes() -> Router<AppState> {
     .route(
       "/servers/{server_id}",
       patch(handlers::server::update_server),
+    )
+    .route(
+      "/servers/{server_id}/members",
+      get(handlers::server::get_server_members),
     )
     // Server Channels
     .route(

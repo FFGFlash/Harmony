@@ -1,4 +1,6 @@
-use crate::models::{CreateServerRequest, Server, UpdateServerRequest};
+use crate::models::{
+  CreateServerRequest, FullProfile, PaginatedResponse, Profile, Server, UpdateServerRequest,
+};
 use crate::utils::{AppError, AppResult};
 use sqlx::{Executor, PgPool, Postgres};
 use uuid::Uuid;
@@ -187,5 +189,53 @@ impl ServerService {
     .await?;
 
     Ok(server)
+  }
+
+  pub async fn get_server_members(
+    db: &PgPool,
+    server_id: Uuid,
+    limit: i64,
+    offset: i64,
+  ) -> AppResult<PaginatedResponse<FullProfile>> {
+    // Get total count
+    let total: i64 = sqlx::query_scalar(
+      r#"
+      SELECT COUNT(*)
+      FROM server_members
+      WHERE server_id = $1
+      "#,
+    )
+    .bind(server_id)
+    .fetch_one(db)
+    .await?;
+
+    // Get paginated data
+    let members = sqlx::query_as::<_, FullProfile>(
+      r#"
+      SELECT
+        u.id, u.username, p.display_name, p.bio, p.avatar_url, p.banner_url,
+        p.status, p.custom_status, p.status_emoji, p.show_online_status,
+        p.allow_dms, p.created_at, p.updated_at
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      INNER JOIN server_members sm ON u.id = sm.user_id
+      WHERE sm.server_id = $1
+      ORDER BY u.username ASC
+      LIMIT $2 OFFSET $3
+      "#,
+    )
+    .bind(server_id)
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(db)
+    .await?;
+
+    Ok(PaginatedResponse {
+      data: members,
+      total,
+      limit,
+      offset,
+      has_more: offset + limit < total,
+    })
   }
 }

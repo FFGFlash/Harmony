@@ -29,7 +29,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-secret-jwt-key-change-this-in-production}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400}
       RUST_LOG: ${RUST_LOG:-debug}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://localhost:5173}
     depends_on:
       postgres:
         condition: service_healthy

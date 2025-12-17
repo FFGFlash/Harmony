@@ -1,8 +1,12 @@
 use crate::AppState;
 use crate::middleware::CurrentUser;
-use crate::models::{CreateServerRequest, ServerResponse, UpdateServerRequest};
+use crate::models::{
+  CreateServerRequest, FullProfile, PaginatedResponse, PaginationParams, ServerResponse,
+  UpdateServerRequest,
+};
 use crate::services::ServerService;
 use crate::utils::AppResult;
+use axum::extract::Query;
 use axum::{
   Extension, Json,
   extract::{Path, State},
@@ -65,4 +69,23 @@ pub async fn update_server(
 ) -> AppResult<Json<ServerResponse>> {
   let server = ServerService::update_server(&state.db, server_id, user.id, req).await?;
   Ok(Json(server.to_response(user.id)))
+}
+
+pub async fn get_server_members(
+  State(state): State<AppState>,
+  Extension(user): Extension<CurrentUser>,
+  Path(server_id): Path<Uuid>,
+  Query(params): Query<PaginationParams>,
+) -> AppResult<Json<PaginatedResponse<FullProfile>>> {
+  // Check if user is a member
+  if !ServerService::is_member(&state.db, server_id, user.id).await? {
+    return Err(crate::utils::AppError::Unauthorized(
+      "You are not a member of this server".to_string(),
+    ));
+  }
+
+  let params = params.sanitize();
+  let members =
+    ServerService::get_server_members(&state.db, server_id, params.limit, params.offset).await?;
+  Ok(Json(members))
 }

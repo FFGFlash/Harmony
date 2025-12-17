@@ -5,6 +5,7 @@
 	import ChannelLink from '$lib/components/ChannelLink.svelte'
 	import NavButton from '$lib/components/NavButton.svelte'
 	import ServerList from '$lib/components/ServerList.svelte'
+	import UserSearch from '$lib/components/UserSearch.svelte'
 	import { channelHistory } from '$lib/stores/channelHistory.svelte'
 
 	import { MessageCircleHeartIcon, UsersIcon, HashIcon, AudioLinesIcon } from '@lucide/svelte'
@@ -54,7 +55,7 @@
 		<div class="flex h-12 items-center border-b border-surface-500 px-4 shadow-sm">
 			<h2 class="truncate h2 text-base">
 				{#if isDM}
-					<!-- TODO: Search Bar -->
+					<UserSearch />
 				{:else}
 					{server.data?.name}
 				{/if}
